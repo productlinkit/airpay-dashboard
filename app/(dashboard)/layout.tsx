@@ -3,10 +3,12 @@ import { Sidebar } from "@/components/Sidebar";
 import { Topbar } from "@/components/Topbar";
 import { SandboxBar } from "@/components/SandboxBar";
 import { SetupGuide } from "@/components/SetupGuide";
+import { AuthGuard } from "@/components/AuthGuard";
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="flex min-h-screen flex-col bg-background">
+    <AuthGuard>
+      <div className="flex min-h-screen flex-col bg-background">
       <SandboxBar />
 
       <div className="flex min-h-0 flex-1">
@@ -31,8 +33,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         </div>
       </div>
 
-      {/* Floating Stripe-style setup checklist */}
-      <SetupGuide />
-    </div>
+        {/* Floating Stripe-style setup checklist */}
+        <SetupGuide />
+      </div>
+    </AuthGuard>
   );
 }

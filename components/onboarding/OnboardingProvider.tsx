@@ -24,6 +24,8 @@ type OnboardingState = {
   emailVerified: boolean;
   /** Whether the first-time email prompt has auto-opened once already. */
   emailPromptSeen: boolean;
+  /** Signed in — the dashboard is gated behind this; entry point is /login. */
+  authed: boolean;
 };
 
 type OnboardingContextValue = OnboardingState & {
@@ -34,8 +36,12 @@ type OnboardingContextValue = OnboardingState & {
   submit: (kyb: KybData) => void;
   /** Simulated admin decision (FR-ONB-8). */
   decide: (status: OnbStatus, note?: string) => void;
-  /** Start a fresh account (register): reset everything, keep only the email. */
+  /** Start a fresh account (register): reset everything, keep only the email; signs in. */
   startAccount: (email: string) => void;
+  /** Sign in a returning user (login) — sets the account email. */
+  signIn: (email: string) => void;
+  /** Sign out — returns the user to /login. */
+  signOut: () => void;
   /** Update the account email without resetting (returning login). */
   setEmail: (email: string) => void;
   /** Step 1 complete — email confirmed. */
@@ -57,6 +63,7 @@ const initial: OnboardingState = {
   email: "",
   emailVerified: false,
   emailPromptSeen: false,
+  authed: false,
 };
 
 const OnboardingContext = createContext<OnboardingContextValue | null>(null);
@@ -123,11 +130,14 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
         reviewNote: note ?? "",
         history: pushHistory(s, status, note),
       })),
-    startAccount: (email) => setState({ ...initial, email }),
+    startAccount: (email) => setState({ ...initial, email, authed: true }),
+    signIn: (email) => setState((s) => ({ ...s, email, authed: true })),
+    signOut: () => setState((s) => ({ ...s, authed: false })),
     setEmail: (email) => setState((s) => ({ ...s, email })),
     verifyEmail: () => setState((s) => ({ ...s, emailVerified: true, emailPromptSeen: true })),
     markEmailPromptSeen: () => setState((s) => ({ ...s, emailPromptSeen: true })),
-    reset: () => setState({ ...initial }),
+    // Reset onboarding progress but stay signed in (keeps the account/email).
+    reset: () => setState((s) => ({ ...initial, authed: s.authed, email: s.email })),
   };
 
   return <OnboardingContext.Provider value={value}>{children}</OnboardingContext.Provider>;

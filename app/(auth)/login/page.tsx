@@ -17,7 +17,7 @@ import { isValidEmail } from "@/lib/auth";
 
 export default function LoginPage() {
   const router = useRouter();
-  const { setEmail: setAccountEmail } = useOnboarding();
+  const { signIn } = useOnboarding();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -34,7 +34,7 @@ export default function LoginPage() {
     if (!password) return setError("Enter your password.");
     setError("");
     setLoading(true);
-    setAccountEmail(email);
+    signIn(email);
 
     setTimeout(() => router.push(merchantLanding), 700);
   }
@@ -106,6 +106,7 @@ export default function LoginPage() {
           onCancel={() => setShowLink(false)}
           onLink={() => {
             setShowLink(false);
+            signIn(email || "you@company.com");
             router.push(merchantLanding);
           }}
         />

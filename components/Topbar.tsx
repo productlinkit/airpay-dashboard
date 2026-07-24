@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Search, MessageSquare, Bell, ChevronDown, LogOut, User, Settings } from "lucide-react";
 import { toast } from "sonner";
 import { Logo } from "./Logo";
+import { useOnboarding } from "@/components/onboarding/OnboardingProvider";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
   DropdownMenu,
@@ -23,6 +24,7 @@ const notifications = [
 
 export function Topbar() {
   const router = useRouter();
+  const { signOut } = useOnboarding();
   const [query, setQuery] = useState("");
 
   return (
@@ -113,7 +115,13 @@ export function Topbar() {
               <Settings size={16} /> Account &amp; security
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem variant="destructive" onClick={() => router.push("/login")}>
+            <DropdownMenuItem
+              variant="destructive"
+              onClick={() => {
+                signOut();
+                router.push("/login");
+              }}
+            >
               <LogOut size={16} /> Log out
             </DropdownMenuItem>
           </DropdownMenuContent>
