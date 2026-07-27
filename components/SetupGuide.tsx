@@ -233,7 +233,7 @@ export function SetupGuide() {
       <>
         <button
           onClick={() => setDismissed(false)}
-          className="fixed bottom-5 right-5 z-40 flex items-center gap-2 rounded-full bg-ink px-4 py-3 text-sm font-semibold text-white shadow-lg transition-transform hover:scale-[1.03]"
+          className="fixed bottom-14 right-5 z-40 flex items-center gap-2 rounded-full bg-ink px-4 py-3 text-sm font-semibold text-white shadow-lg transition-transform hover:scale-[1.03]"
         >
           <ListChecks size={17} />
           Setup guide
@@ -248,7 +248,7 @@ export function SetupGuide() {
 
   return (
     <>
-      <div className="fixed bottom-5 right-5 z-40 w-[92vw] max-w-[340px] overflow-hidden rounded-2xl border border-border bg-card shadow-xl">
+      <div className="fixed bottom-14 right-5 z-40 w-[92vw] max-w-[340px] overflow-hidden rounded-2xl border border-border bg-card shadow-xl">
         {/* header */}
         <div className="flex items-center justify-between px-4 pt-3.5">
           <p className="text-sm font-bold text-foreground">Setup guide</p>

@@ -4,6 +4,7 @@ import { Topbar } from "@/components/Topbar";
 import { SandboxBar } from "@/components/SandboxBar";
 import { SetupGuide } from "@/components/SetupGuide";
 import { AuthGuard } from "@/components/AuthGuard";
+import { DeveloperWorkbench } from "@/components/DeveloperWorkbench";
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -17,7 +18,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         <div className="flex min-w-0 flex-1 flex-col">
           <Topbar />
 
-          <main className="flex-1 px-5 pb-8 lg:px-8">
+          <main className="flex-1 px-5 pb-16 lg:px-8">
             {children}
 
             <footer className="mt-8 flex flex-col items-center justify-between gap-4 border-t border-border pt-6 text-xs text-muted-foreground sm:flex-row">
@@ -35,6 +36,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
         {/* Floating Stripe-style setup checklist */}
         <SetupGuide />
+
+        {/* Developers workbench — full-width fixed bottom bar + resizable panel */}
+        <DeveloperWorkbench />
       </div>
     </AuthGuard>
   );

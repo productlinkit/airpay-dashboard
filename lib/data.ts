@@ -7,7 +7,6 @@ import {
   Repeat,
   Blocks,
   LayoutTemplate,
-  Code2,
   BarChart3,
   Settings,
   type LucideIcon,
@@ -30,7 +29,6 @@ export const navItems: NavItem[] = [
   { label: "Subscriptions", icon: Repeat },
   { label: "Products", icon: Blocks },
   { label: "Landing Pages", icon: LayoutTemplate },
-  { label: "Developers", icon: Code2 },
   { label: "Reports", icon: BarChart3 },
   { label: "Settings", icon: Settings },
 ];

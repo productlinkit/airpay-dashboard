@@ -71,6 +71,9 @@ export function Sidebar() {
           </button>
         </div>
       </div>
+
+      {/* Spacer so the environment card clears the fixed Developers bar. */}
+      <div className="h-6 shrink-0" />
     </aside>
   );
 }
