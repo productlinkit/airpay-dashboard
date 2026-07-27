@@ -638,14 +638,11 @@ function StatusView({ onEdit }: { onEdit: () => void }) {
           <div className="mt-5 rounded-xl border border-success/25 bg-success-soft p-4">
             <p className="text-sm font-semibold text-foreground">You&apos;re ready to go live</p>
             <p className="mt-0.5 text-sm text-body">
-              Activate a product (DCB or Digital Payment) to start accepting live payments.
+              Your business is verified. Switch to a live account from the dashboard to start
+              accepting real payments.
             </p>
             <div className="mt-3 flex flex-wrap gap-2">
-              <Button className="rounded-xl" disabled title="Coming in 5.3">
-                Activate a product
-                <ArrowRight size={16} />
-              </Button>
-              <Button asChild variant="outline" className="rounded-xl">
+              <Button asChild className="rounded-xl">
                 <Link href="/">Back to dashboard</Link>
               </Button>
             </div>

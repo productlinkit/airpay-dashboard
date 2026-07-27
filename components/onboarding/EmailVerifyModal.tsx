@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { MailCheck, RefreshCw } from "lucide-react";
+import { MailCheck, RefreshCw, BadgeCheck } from "lucide-react";
 import { toast } from "sonner";
 import { useOnboarding } from "@/components/onboarding/OnboardingProvider";
 import {
@@ -43,6 +43,33 @@ export function EmailVerifyModal({
       onOpenChange(false);
       toast.success("Email verified — you can now verify your business.");
     }, 700);
+  }
+
+  // Already verified — show a confirmation instead of the verification prompt.
+  if (ob.emailVerified) {
+    return (
+      <Dialog open={open} onOpenChange={onOpenChange}>
+        <DialogContent className="rounded-2xl sm:max-w-md">
+          <DialogHeader className="items-center text-center">
+            <span className="mb-2 grid h-14 w-14 place-items-center rounded-2xl bg-success-soft text-success">
+              <BadgeCheck size={28} />
+            </span>
+            <DialogTitle className="text-xl">Email verified</DialogTitle>
+            <DialogDescription>
+              <span className="font-semibold text-foreground">{email}</span> is confirmed. You&apos;re
+              all set — no further action needed.
+            </DialogDescription>
+          </DialogHeader>
+
+          <button
+            onClick={() => onOpenChange(false)}
+            className="mt-2 flex h-11 w-full items-center justify-center rounded-xl bg-primary text-sm font-semibold text-white transition-colors hover:bg-primary-dark"
+          >
+            Done
+          </button>
+        </DialogContent>
+      </Dialog>
+    );
   }
 
   return (

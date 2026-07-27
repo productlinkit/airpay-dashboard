@@ -9,6 +9,20 @@ import {
   type OnbStatus,
   type HistoryEntry,
 } from "@/lib/onboarding";
+import {
+  defaultBranding,
+  defaultReminders,
+  type ProductItem,
+  type BrandingData,
+  type CustomerItem,
+  type RemindersData,
+} from "@/lib/setup";
+import {
+  emptyActivations,
+  type Activations,
+  type Activation,
+  type ProductKey,
+} from "@/lib/activation";
 
 type OnboardingState = {
   status: OnbStatus;
@@ -26,6 +40,24 @@ type OnboardingState = {
   emailPromptSeen: boolean;
   /** Signed in — the dashboard is gated behind this; entry point is /login. */
   authed: boolean;
+  /** Setup guide task completion (Manage Payment / Payments / Invoices), keyed by task id. */
+  tasks: Record<string, boolean>;
+  /** "Set up Manage Payment" — selected product tax category ("Tell us what you sell most"). */
+  sellCategory: string;
+  /** "Set up Payments" — chosen "how to accept payments" integration key. */
+  acceptMethod: string;
+  /** Products created via the "Add a product" flow. */
+  products: ProductItem[];
+  /** "Set up invoices" — brand elements from the Branding settings modal. */
+  branding: BrandingData;
+  /** Customers created via the "Create a customer" flow. */
+  customers: CustomerItem[];
+  /** "Set up invoices" — automatic payment reminder schedule. */
+  reminders: RemindersData;
+  /** Live account active (switched from sandbox). Requires verified email + business. */
+  live: boolean;
+  /** Service activation state per product (DCB / Digital Payment) — PRD 5.3. */
+  activations: Activations;
 };
 
 type OnboardingContextValue = OnboardingState & {
@@ -48,6 +80,34 @@ type OnboardingContextValue = OnboardingState & {
   verifyEmail: () => void;
   /** Record that the first-time email prompt has been shown. */
   markEmailPromptSeen: () => void;
+  /** Mark a Setup guide task done/undone. */
+  setTask: (key: string, done: boolean) => void;
+  /** Persist the selected "Tell us what you sell most" category. */
+  setSellCategory: (category: string) => void;
+  /** Persist the chosen "how to accept payments" integration. */
+  setAcceptMethod: (key: string) => void;
+  /** Add a product created in the "Add a product" flow. */
+  addProduct: (product: ProductItem) => void;
+  /** Persist brand elements from the Branding settings modal. */
+  saveBranding: (branding: BrandingData) => void;
+  /** Add a customer created in the "Create a customer" flow. */
+  addCustomer: (customer: CustomerItem) => void;
+  /** Persist the automatic payment reminder schedule. */
+  saveReminders: (reminders: RemindersData) => void;
+  /** Switch between the live account and sandbox. */
+  setLive: (live: boolean) => void;
+  /** Save an activation draft (FR-ACT-1..3) — bumps status to in_progress. */
+  saveActivation: (
+    product: ProductKey,
+    data: Pick<Activation, "agreementAccepted" | "channels" | "docs">,
+  ) => void;
+  /** Submit an activation for admin review (FR-ACT-4). */
+  submitActivation: (
+    product: ProductKey,
+    data: Pick<Activation, "agreementAccepted" | "channels" | "docs">,
+  ) => void;
+  /** Simulated admin decision on an activation (FR-ACT-4/5). */
+  decideActivation: (product: ProductKey, status: "live" | "rejected", note?: string) => void;
   reset: () => void;
 };
 
@@ -64,6 +124,15 @@ const initial: OnboardingState = {
   emailVerified: false,
   emailPromptSeen: false,
   authed: false,
+  tasks: {},
+  sellCategory: "",
+  acceptMethod: "",
+  products: [],
+  branding: defaultBranding,
+  customers: [],
+  reminders: defaultReminders,
+  live: false,
+  activations: emptyActivations,
 };
 
 const OnboardingContext = createContext<OnboardingContextValue | null>(null);
@@ -128,6 +197,8 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
         ...s,
         status,
         reviewNote: note ?? "",
+        // Can't stay on the live account if the business is no longer verified.
+        live: status === "verified" ? s.live : false,
         history: pushHistory(s, status, note),
       })),
     startAccount: (email) => setState({ ...initial, email, authed: true }),
@@ -136,6 +207,45 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
     setEmail: (email) => setState((s) => ({ ...s, email })),
     verifyEmail: () => setState((s) => ({ ...s, emailVerified: true, emailPromptSeen: true })),
     markEmailPromptSeen: () => setState((s) => ({ ...s, emailPromptSeen: true })),
+    setTask: (key, done) => setState((s) => ({ ...s, tasks: { ...s.tasks, [key]: done } })),
+    setSellCategory: (sellCategory) => setState((s) => ({ ...s, sellCategory })),
+    setAcceptMethod: (acceptMethod) => setState((s) => ({ ...s, acceptMethod })),
+    addProduct: (product) => setState((s) => ({ ...s, products: [product, ...s.products] })),
+    saveBranding: (branding) => setState((s) => ({ ...s, branding })),
+    addCustomer: (customer) => setState((s) => ({ ...s, customers: [customer, ...s.customers] })),
+    saveReminders: (reminders) => setState((s) => ({ ...s, reminders })),
+    setLive: (live) => setState((s) => ({ ...s, live })),
+    saveActivation: (product, data) =>
+      setState((s) => {
+        const prev = s.activations[product];
+        return {
+          ...s,
+          activations: {
+            ...s.activations,
+            [product]: {
+              ...prev,
+              ...data,
+              status: prev.status === "not_activated" ? "in_progress" : prev.status,
+            },
+          },
+        };
+      }),
+    submitActivation: (product, data) =>
+      setState((s) => ({
+        ...s,
+        activations: {
+          ...s.activations,
+          [product]: { ...s.activations[product], ...data, status: "in_review", reviewNote: "" },
+        },
+      })),
+    decideActivation: (product, status, note) =>
+      setState((s) => ({
+        ...s,
+        activations: {
+          ...s.activations,
+          [product]: { ...s.activations[product], status, reviewNote: note ?? "" },
+        },
+      })),
     // Reset onboarding progress but stay signed in (keeps the account/email).
     reset: () => setState((s) => ({ ...initial, authed: s.authed, email: s.email })),
   };
